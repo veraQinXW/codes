@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>三级联动</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        
+        #box {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        #box div {
+            width: 100%;
+            height: 40px;
+            overflow: hidden;
+        }
+        
+        #box .show {
+            height: 240px;
+            overflow-y: scroll;
+        }
+        
+        #box div:nth-child(2) {
+            margin: 10px 0;
+        }
+        
+        #box div dl {
+            cursor: pointer;
+        }
+        
+        #box div dl dt,
+        #box div dl dd {
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: #05a4f8;
+        }
+        
+        #box div dl dd:hover {
+            background: #000580;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="box">
+        <div>
+            <dl id="pro">
+                <dt>请输入省份</dt>
+            </dl>
+        </div>
+        <div>
+            <dl id="city">
+                <dt>请输入城市</dt>
+            </dl>
+        </div>
+        <div>
+            <dl id="area">
+                <dt>请输入县区</dt>
+            </dl>
+        </div>
+    </div>
+</body>
+<script>
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('get', 'address.json', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var data = JSON.parse(xhr.responseText);
+            call(data);
+        }
+    }
+    xhr.send(null);
+
+    function call(d) {
+        //确定省份
+        $('pro').onclick = function(event) {
+            var e = event || window.event;
+            var ele = e.target || e.srcElement;
+            e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+            if (ele.nodeName.toLowerCase() == 'dd') {
+                //$('pro').children[0].innerHTML = ele.innerHTML;
+                $('pro').innerHTML = '<dt>' + ele.innerHTML + '</dt>';
+                $('pro').parentNode.className = '';
+                $('pro').parentNode.scrollTop = 0;
+
+                //确定城市
+                $('city').onclick = function(event) {
+                    var e = event || window.event;
+                    var ele = e.target || e.srcElement;
+                    e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+                    if (ele.nodeName.toLowerCase() == 'dd') {
+                        $('city').innerHTML = '<dt>' + ele.innerHTML + '</dt>';
+                        $('city').parentNode.className = '';
+                        $('city').parentNode.scrollTop = 0;
+
+                        //确定县区
+                        $('area').onclick = function(event) {
+                            var e = event || window.event;
+                            var ele = e.target || e.srcElement;
+                            e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+                            if (ele.nodeName.toLowerCase() == 'dd') {
+                                $('area').innerHTML = '<dt>' + ele.innerHTML + '</dt>';
+                                $('area').parentNode.className = '';
+                                $('area').parentNode.scrollTop = 0;
+                            }
+                            if (ele.nodeName.toLowerCase() == 'dt') {
+                                $('area').innerHTML = '<dt>请输入县区</dt>';
+                                d.forEach(function(item, index) {
+                                    if (item.Name == $('pro').children[0].innerHTML) {
+                                        item.City.forEach(function(item, index) {
+                                            if (item.Name == $('city').children[0].innerHTML) {
+                                                if (item.Region) {
+                                                    item.Region.forEach(function(item, index) {
+                                                        $('area').innerHTML += '<dd>' + item.Name + '</dd>';
+                                                        $('area').parentNode.className = 'show';
+                                                    })
+                                                } else {
+                                                    $('area').innerHTML += '<dd>' + $('city').children[0].innerHTML + '</dd>';
+                                                    $('area').parentNode.className = 'show';
+                                                }
+                                            }
+                                        })
+                                    }
+                                })
+                                //$('area').parentNode.className = 'show';
+                            }
+                        }
+                    }
+                    if (ele.nodeName.toLowerCase() == 'dt') {
+                        $('city').innerHTML = '<dt>请输入城市</dt>';
+                        $('area').innerHTML = '<dt>请输入县区</dt>';
+                        d.forEach(function(item, index) {
+                            if (item.Name == $('pro').children[0].innerHTML) {
+                                item.City.forEach(function(item, index) {
+                                    $('city').innerHTML += '<dd>' + item.Name + '</dd>';
+                                })
+                                $('city').parentNode.className = 'show';
+                            }
+                        }) 
+                        //$('city').parentNode.className = 'show';
+                    }
+                }
+            }
+            if (ele.nodeName.toLowerCase() == 'dt') {
+                $('pro').innerHTML = '<dt>请输入省份</dt>';
+                $('city').innerHTML = '<dt>请输入城市</dt>';
+                $('area').innerHTML = '<dt>请输入县区</dt>';
+                d.forEach(function(item, index) {
+                    $('pro').innerHTML += '<dd>' + item.Name + '</dd>';
+                })
+                $('pro').parentNode.className = 'show';
+            }
+        }
+        document.body.onclick = function() {
+            $('pro').parentNode.className = '';
+            $('city').parentNode.className = '';
+            $('area').parentNode.className = '';
+            
+            $('pro').parentNode.scrollTop = 0;
+            $('city').parentNode.scrollTop = 0;
+            $('area').parentNode.scrollTop = 0;
+        }
+    }
+
+</script>
+
+</html>

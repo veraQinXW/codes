@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ajax</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        form {
+            width: 496px;
+            height: 40px;
+            margin: 100px auto;
+        }
+        
+        select {
+            display: inline-block;
+            width: 162px;
+            height: 40px;
+            font-size: 18px;
+            line-height: 40px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+
+<body>
+    <form action="">
+        <select name="pro" id="pro">
+            <option value="">--请选择省--</option>
+        </select>
+        <select name="city" id="city">
+            <option value="">--请选择市--</option>
+        </select>
+        <select name="area" id="area">
+            <option value="">--请选择区--</option>
+        </select>
+    </form>
+</body>
+<script>
+   
+    var pro = document.getElementById('pro'),
+        city = document.getElementById('city'),
+        area = document.getElementById('area');
+    //ajax 引入json 打电话
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", 'address.json', 'true');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+
+            var result = xhr.responseText;
+            var o_result = JSON.parse(result);
+            fn(o_result);
+        }
+    }
+    xhr.send(null);
+
+    function fn(d) {//遍历省加入
+        for (var key in d) {
+//            console.log(key)所有的下标
+//            console.log(d[key])数组里的第一层对象
+//            console.log(d[key].Name)数组里的第一层对象的Name里的值
+            //  document.write("省:"+o_result[key].Name+"<br/>");
+            pro.innerHTML += '<option value="'+key+'">' + d[key].Name + '</option>';
+            console.log(pro.value)
+        }//省点击时 遍历市
+        pro.onchange = function() {//重新点击时 重置之后的
+            city.innerHTML = '<option value="">--请选择市--</option>';
+            area.innerHTML = '<option value="">--请选择区--</option>';
+           for (var i in d[this.value].City) {
+                //      document.write("市:"+d[key].City[i].Name+"<br/>");
+                city.innerHTML += '<option value="'+i+'">' + d[this.value].City[i].Name + '</option>';
+                //点击市时 遍历县
+                city.onchange = function() {//点击市时 重置之后的
+                   area.innerHTML = '<option value="">--请选择区--</option>';
+                    
+                    for (var j in d[pro.value].City[this.value].Region) {
+                //      document.write("区:"+d[key].City[i].Region[j].Name+"<br/>");
+                        area.innerHTML += '<option value="'+j+'">' + d[pro.value].City[this.value].Region[j].Name + '</option>';
+                    }
+                }
+            }
+        }
+
+    }
+
+</script>
+
+</html>

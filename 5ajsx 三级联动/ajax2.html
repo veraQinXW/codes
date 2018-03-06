@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>自定义三级联动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #box {
+            width: 400px;
+            margin: 100px auto;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 20px;
+            height: 40px;
+            /*            清浮动 但此处不能设定高*/
+        }
+        
+        #box div {
+            width: 120px;
+            height: 40px;
+            line-height: 40px;
+            /*            display: inline-block;*/
+            overflow: hidden;
+            float: left;
+            margin-left: 10px;
+            /*            浮动的方法此处转行内块即可(not)*/
+        }
+        
+        #box .show {
+            /*            height: 240px;*/
+            max-height: 240px;
+            height: auto;
+            overflow-y: scroll;
+        }
+        
+        dt,
+        dd {
+            width: 120px;
+            height: 40px;
+            color: #fff;
+            background: #559CD5;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="box">
+        <div>
+            <dl id="pro">
+                <dt>--请输入省份--</dt>
+            </dl>
+        </div>
+        <div>
+            <dl id="city">
+                <dt>--请输入市--</dt>
+            </dl>
+        </div>
+        <div>
+            <dl id="area">
+                <dt>--请输入区--</dt>
+            </dl>
+        </div>
+    </div>
+</body>
+<script>
+    var pro = document.getElementById('pro'),
+        city = document.getElementById('city'),
+        area = document.getElementById('area');
+    var phone = new XMLHttpRequest();
+    phone.open('get', 'address.json', 'true');
+    phone.onreadystatechange = function() {
+        if (phone.readyState == 4 && phone.status == 200) {
+            var add = JSON.parse(phone.responseText); //console.log(add)
+            handle(add);
+        }
+    }
+    phone.send(null);
+
+    function handle(a) {
+        a.forEach(function(item, index) {
+                //            pro.innerHTML+='<dd>'+item.Name+'</dd>'
+                var oPro = document.createElement('dd');
+
+                oPro.innerHTML = item.Name;
+                            console.log(item)
+                pro.appendChild(oPro);
+
+                oPro.onclick = function() {
+                    pro.children[0].innerHTML = this.innerHTML;
+                    pro.parentNode.className = '';
+                    pro.parentNode.scrollTop = 0;
+                    city.children[0].innerHTML = '--请输入市--';
+                    //删除上次选择省份所对应的城市单元
+                    while (city.children.length != 1) {
+                        city.removeChild(city.children[1]);
+                    }
+                     area.children[0].innerHTML = '--请输入区--';
+                                    //删除上次选择省份所对应的城市单元
+                                    while (area.children.length != 1) {
+                                    area.removeChild(area.children[1]);
+                                    }
+                    if (item.Name == pro.children[0].innerHTML) {
+                        item.City.forEach(function(item, index) {
+
+                                var oCity = document.createElement('dd');
+                                oCity.innerHTML = item.Name;
+                                //            console.log(item)
+                                city.appendChild(oCity);
+
+                                oCity.onclick = function() {
+                                    //city.innerHTML = '<dt>--请输入市--</dt>'
+                                    city.children[0].innerHTML = this.innerHTML;
+                                    city.parentNode.className = '';
+                                    city.parentNode.scrollTop = 0;
+                                    area.children[0].innerHTML = '--请输入区--';
+                                    //删除上次选择省份所对应的城市单元
+                                    while (area.children.length != 1) {
+                                    area.removeChild(area.children[1]);
+                                    }
+                                    //a.forEach(function(item, index) {}
+                                        if (item.Name == city.children[0].innerHTML) {
+                                            item.Region.forEach(function(item,index) {
+//                                                console.log(item)
+                                                var oArea = document.createElement('dd');
+                                                oArea.innerHTML = item.Name;
+                                                //            console.log(item)
+                                                area.appendChild(oArea);
+
+                                                oArea.onclick = function() {
+                                                    area.children[0].innerHTML = this.innerHTML;
+                                                    area.parentNode.className = '';
+                                                    area.scrollTop = 0;
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
+                        }
+                    }
+                }) 
+        pro.children[0].onclick = function() {
+                pro.parentNode.className = 'show';
+                //city.innerHTML = '<dt>--请输入市--</dt>'
+            }
+
+
+            //显示城市
+            city.children[0].onclick = function() {
+                city.parentNode.className = 'show';
+
+                //            city.innerHTML = '<dt>--请输入市--</dt>'
+                //            area.innerHTML = '<dt>--请输入区--</dt>'
+            }
+             area.children[0].onclick = function() {
+                area.parentNode.className = 'show';
+
+                //            city.innerHTML = '<dt>--请输入市--</dt>'
+                //            area.innerHTML = '<dt>--请输入区--</dt>'
+            }
+        }
+
+</script>
+
+</html>
